@@ -17,7 +17,7 @@ export const HARBORS: Harbor[] = [
 ];
 
 export function nearestHarbor(lat: number, lon: number): Harbor {
-  let best = HARBORS[0];
+  let best = HARBORS[0]!;
   let bestD = Number.POSITIVE_INFINITY;
   for (const h of HARBORS) {
     const d = (h.lat - lat) ** 2 + (h.lon - lon) ** 2;
