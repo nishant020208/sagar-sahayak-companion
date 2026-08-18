@@ -14,7 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      advisory_log: {
+        Row: {
+          created_at: string
+          id: string
+          lat: number
+          location_name: string
+          lon: number
+          message: string
+          verdict: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lat: number
+          location_name: string
+          lon: number
+          message: string
+          verdict: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lat?: number
+          location_name?: string
+          lon?: number
+          message?: string
+          verdict?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
