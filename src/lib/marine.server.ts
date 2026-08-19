@@ -173,30 +173,36 @@ export async function callGranite(prompt: string): Promise<string> {
   if (!apiKey || !projectId || !baseUrl) return callLovableAI(prompt);
 
 
-  const token = await watsonxToken(apiKey);
-  const res = await fetch(
-    `${baseUrl.replace(/\/$/, "")}/ml/v1/text/generation?version=2023-05-29`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
+  try {
+    const token = await watsonxToken(apiKey);
+    const res = await fetch(
+      `${baseUrl.replace(/\/$/, "")}/ml/v1/text/generation?version=2023-05-29`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          model_id: "ibm/granite-3-8b-instruct",
+          project_id: projectId,
+          input: prompt,
+          parameters: { decoding_method: "greedy", max_new_tokens: 400, repetition_penalty: 1.05 },
+        }),
       },
-      body: JSON.stringify({
-        model_id: "ibm/granite-3-8b-instruct",
-        project_id: projectId,
-        input: prompt,
-        parameters: { decoding_method: "greedy", max_new_tokens: 400, repetition_penalty: 1.05 },
-      }),
-    },
-  );
-  if (!res.ok) throw new Error(`watsonx failed (${res.status})`);
-  const json = (await res.json()) as { results?: { generated_text?: string }[] };
-  const text = json.results?.[0]?.generated_text?.trim();
-  if (!text) throw new Error("watsonx returned no text");
-  return text;
+    );
+    if (!res.ok) throw new Error(`watsonx failed (${res.status})`);
+    const json = (await res.json()) as { results?: { generated_text?: string }[] };
+    const text = json.results?.[0]?.generated_text?.trim();
+    if (!text) throw new Error("watsonx returned no text");
+    return text;
+  } catch (e) {
+    console.error("watsonx call failed, falling back to AI gateway", e);
+    return callLovableAI(prompt);
+  }
 }
+
 
 export function extractJson<T>(text: string): T | null {
   const start = text.indexOf("{");
