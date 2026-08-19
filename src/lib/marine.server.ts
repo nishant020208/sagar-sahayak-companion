@@ -144,11 +144,34 @@ async function watsonxToken(apiKey: string): Promise<string> {
   return json.access_token;
 }
 
+async function callLovableAI(prompt: string): Promise<string> {
+  const key = process.env["LOVABLE_API_KEY"];
+  if (!key) throw new Error("no AI credentials configured");
+  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages: [{ role: "user", content: prompt }],
+    }),
+  });
+  if (!res.ok) throw new Error(`AI gateway failed (${res.status})`);
+  const json = (await res.json()) as {
+    choices?: { message?: { content?: string } }[];
+  };
+  const text = json.choices?.[0]?.message?.content?.trim();
+  if (!text) throw new Error("AI gateway returned no text");
+  return text;
+}
+
 export async function callGranite(prompt: string): Promise<string> {
   const apiKey = process.env["WATSONX_API_KEY"];
   const projectId = process.env["WATSONX_PROJECT_ID"];
   const baseUrl = process.env["WATSONX_URL"];
-  if (!apiKey || !projectId || !baseUrl) throw new Error("watsonx secrets not configured");
+  // watsonx Granite when configured; otherwise the hosted AI gateway keeps
+  // every advisory on real model output instead of canned text.
+  if (!apiKey || !projectId || !baseUrl) return callLovableAI(prompt);
+
 
   const token = await watsonxToken(apiKey);
   const res = await fetch(
