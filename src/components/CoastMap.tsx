@@ -35,7 +35,6 @@ export default function CoastMap({
   const mapRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.LayerGroup | null>(null);
 
-  // Create the map once the container is mounted and visible.
   useEffect(() => {
     const el = containerRef.current;
     if (!el || mapRef.current) return;
@@ -48,7 +47,6 @@ export default function CoastMap({
     layerRef.current = L.layerGroup().addTo(map);
     mapRef.current = map;
 
-    // Tiles render as floating fragments unless size is recalculated after mount.
     const invalidate = () => map.invalidateSize();
     const raf = requestAnimationFrame(invalidate);
     const timer = window.setTimeout(invalidate, 300);
@@ -68,7 +66,6 @@ export default function CoastMap({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Draw markers for the current view.
   useEffect(() => {
     const map = mapRef.current;
     const layer = layerRef.current;

@@ -179,7 +179,7 @@ export function mockAnswer(w: WeatherData, place: string, question: string) {
     : "";
   return {
     answer:
-      `[Mock answer — watsonx credentials not configured] Based on live data for ${place}: today reads ${level.toUpperCase()} ` +
+      `[Mock answer — AI credentials not configured] Based on live data for ${place}: today reads ${level.toUpperCase()} ` +
       `(wind ${c.windSpeed} km/h, waves ${c.waveHeight} m, swell ${c.swellHeight} m, SST ${c.sst} °C).${trend} ` +
       `Your question was: "${question}".`,
     mock: true,

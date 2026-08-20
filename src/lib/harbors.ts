@@ -29,11 +29,10 @@ export function nearestHarbor(lat: number, lon: number): Harbor {
   return best;
 }
 
-/** Safety thresholds used for the deterministic guardrail + the "Why" table. */
 export const THRESHOLDS = {
-  wind: { safe: 20, caution: 35 }, // km/h
-  wave: { safe: 1.2, caution: 2.0 }, // m
-  swell: { safe: 1.0, caution: 1.8 }, // m
+  wind: { safe: 20, caution: 35 },
+  wave: { safe: 1.2, caution: 2.0 },
+  swell: { safe: 1.0, caution: 1.8 },
 };
 
 export type Level = "safe" | "caution" | "unsafe";
@@ -47,7 +46,6 @@ export function levelFor(value: number, t: { safe: number; caution: number }): L
 export const worst = (levels: Level[]): Level =>
   levels.includes("unsafe") ? "unsafe" : levels.includes("caution") ? "caution" : "safe";
 
-/** Simplified open-data fishing-zone proxy based on sea surface temperature. */
 export function zoneLikelihood(sst: number | null): "Low" | "Moderate" | "Good" {
   if (sst == null || Number.isNaN(sst)) return "Low";
   if (sst >= 26 && sst <= 29) return "Good";

@@ -37,8 +37,6 @@ export const Route = createFileRoute("/")({
   component: SagarSahayak,
 });
 
-/* ---------------- types & storage ---------------- */
-
 type Weather = Awaited<ReturnType<typeof getWeather>>;
 type AdvisoryResponse = Awaited<ReturnType<typeof getAdvisory>>;
 type Verdict = Extract<AdvisoryResponse, { mode: "verdict" }>;
@@ -75,8 +73,6 @@ const write = (key: string, value: unknown) => {
     /* storage unavailable */
   }
 };
-
-/* ---------------- page ---------------- */
 
 function SagarSahayak() {
   const weatherFn = useServerFn(getWeather);
@@ -145,7 +141,6 @@ function SagarSahayak() {
     [advisoryFn, weatherFn],
   );
 
-  // Initial + 15-minute polling
   useEffect(() => {
     if (!loc) return;
     void refresh(loc);
@@ -309,8 +304,6 @@ function SagarSahayak() {
   );
 }
 
-/* ---------------- location entry ---------------- */
-
 function LocationEntry({
   lang,
   setLang,
@@ -418,8 +411,6 @@ function LocationEntry({
   );
 }
 
-/* ---------------- hero ---------------- */
-
 function VerdictHero({
   lang,
   level,
@@ -497,8 +488,6 @@ function VerdictHero({
   );
 }
 
-/* ---------------- why panel ---------------- */
-
 function WhyPanel({
   lang,
   breakdown,
@@ -575,8 +564,6 @@ function WhyPanel({
     </section>
   );
 }
-
-/* ---------------- tiles & map ---------------- */
 
 function useCountUp(target: number | null) {
   const [display, setDisplay] = useState(target ?? 0);
@@ -716,8 +703,6 @@ function MapPanel({
   );
 }
 
-/* ---------------- ask ---------------- */
-
 function AskBox({
   lang,
   weather,
@@ -791,8 +776,6 @@ function AskBox({
     </section>
   );
 }
-
-/* ---------------- advisory log ---------------- */
 
 function AdvisoryLog({ lang }: { lang: Lang }) {
   const [rows, setRows] = useState<LogRow[]>([]);

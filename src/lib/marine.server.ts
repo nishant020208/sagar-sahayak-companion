@@ -128,8 +128,6 @@ export async function reverseGeocode(lat: number, lon: number): Promise<string |
   }
 }
 
-/* ---------------- watsonx.ai (IBM Granite) ---------------- */
-
 async function watsonxToken(apiKey: string): Promise<string> {
   const res = await fetch("https://iam.cloud.ibm.com/identity/token", {
     method: "POST",
@@ -144,23 +142,28 @@ async function watsonxToken(apiKey: string): Promise<string> {
   return json.access_token;
 }
 
-async function callLovableAI(prompt: string): Promise<string> {
-  const key = process.env["LOVABLE_API_KEY"];
-  if (!key) throw new Error("no AI credentials configured");
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+async function callCerebras(prompt: string): Promise<string> {
+  const key = process.env["CEREBRAS_API_KEY"] || "csk-cejd4jdpwd2m9x8pvm24hmj3p8mc83c3t835fp9txxtcyjt9";
+  const res = await fetch("https://api.cerebras.ai/v1/chat/completions", {
     method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+    headers: {
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
+      model: "llama-3.3-70b",
       messages: [{ role: "user", content: prompt }],
     }),
   });
-  if (!res.ok) throw new Error(`AI gateway failed (${res.status})`);
+  if (!res.ok) {
+    const errText = await res.text().catch(() => "");
+    throw new Error(`Cerebras API failed (${res.status}): ${errText}`);
+  }
   const json = (await res.json()) as {
     choices?: { message?: { content?: string } }[];
   };
   const text = json.choices?.[0]?.message?.content?.trim();
-  if (!text) throw new Error("AI gateway returned no text");
+  if (!text) throw new Error("Cerebras returned no text");
   return text;
 }
 
@@ -168,10 +171,8 @@ export async function callGranite(prompt: string): Promise<string> {
   const apiKey = process.env["WATSONX_API_KEY"];
   const projectId = process.env["WATSONX_PROJECT_ID"];
   const baseUrl = process.env["WATSONX_URL"];
-  // watsonx Granite when configured; otherwise the hosted AI gateway keeps
-  // every advisory on real model output instead of canned text.
-  if (!apiKey || !projectId || !baseUrl) return callLovableAI(prompt);
 
+  if (!apiKey || !projectId || !baseUrl) return callCerebras(prompt);
 
   try {
     const token = await watsonxToken(apiKey);
@@ -198,11 +199,10 @@ export async function callGranite(prompt: string): Promise<string> {
     if (!text) throw new Error("watsonx returned no text");
     return text;
   } catch (e) {
-    console.error("watsonx call failed, falling back to AI gateway", e);
-    return callLovableAI(prompt);
+    console.error("watsonx call failed, falling back to Cerebras", e);
+    return callCerebras(prompt);
   }
 }
-
 
 export function extractJson<T>(text: string): T | null {
   const start = text.indexOf("{");
