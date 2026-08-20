@@ -184,8 +184,9 @@ function SagarSahayak() {
   return (
     <div className="sagar-app" style={{ minHeight: "100vh" }}>
       <header className="topbar">
-        <span className="display" style={{ fontSize: 18 }}>
-          {label("appName")}
+        <span className="brand">
+          <img src="/favicon.png" alt="" className="brand-logo" width={28} height={28} />
+          <span className="display brand-name">{label("appName")}</span>
         </span>
         <button
           className="btn btn-sm"
@@ -349,8 +350,9 @@ function LocationEntry({
 
   return (
     <div className="sagar-app center-card">
-      <div className="panel" style={{ maxWidth: 460, width: "100%" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <div className="panel rise" style={{ maxWidth: 460, width: "100%" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <img src="/favicon.png" alt="" className="brand-logo brand-logo-lg" width={40} height={40} />
           <h1 className="display" style={{ fontSize: 24, margin: 0 }}>
             {t("appName", lang)}
           </h1>
@@ -574,14 +576,46 @@ function WhyPanel({
 
 /* ---------------- tiles & map ---------------- */
 
+function useCountUp(target: number | null) {
+  const [display, setDisplay] = useState(target ?? 0);
+  const fromRef = useRef(target ?? 0);
+
+  useEffect(() => {
+    if (target === null) return;
+    const from = fromRef.current;
+    const to = target;
+    if (from === to) return;
+    const start = performance.now();
+    const dur = 600;
+    let raf = 0;
+    const step = (now: number) => {
+      const p = Math.min(1, (now - start) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setDisplay(from + (to - from) * eased);
+      if (p < 1) raf = requestAnimationFrame(step);
+      else fromRef.current = to;
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [target]);
+
+  return display;
+}
+
 function Tile({ label, value, unit }: { label: string; value: string; unit: string }) {
+  const numeric = value === "—" ? null : Number(value);
+  const target = numeric !== null && Number.isFinite(numeric) ? numeric : null;
+  const animated = useCountUp(target);
+  const decimals = target !== null && !Number.isInteger(target) ? 1 : 0;
+  const shown = target === null ? value : animated.toFixed(decimals);
+
   return (
-    <div className="tile">
+    <div className="tile lift">
       <div className="muted" style={{ fontSize: 13 }}>
         {label}
       </div>
       <div className="v">
-        {value} <span style={{ fontSize: 14 }}>{unit}</span>
+        {shown} <span style={{ fontSize: 14 }}>{unit}</span>
       </div>
     </div>
   );
