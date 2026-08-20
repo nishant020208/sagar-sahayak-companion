@@ -538,6 +538,7 @@ function WhyPanel({
           <h3 className="display" style={{ fontSize: 14, margin: "18px 0 8px" }}>
             {t("thresholds", lang)}
           </h3>
+          <div className="table-scroll">
           <table className="thr">
             <thead>
               <tr>
@@ -568,6 +569,7 @@ function WhyPanel({
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </section>
